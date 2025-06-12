@@ -1,5 +1,21 @@
 #! /bin/bash
 
+# If running as root, switch to the real user
+if [ "$(id -u)" -eq 0 ]; then
+    # Get the first real user (non-system user)
+    REAL_USER=$(dscl . -list /Users UniqueID | awk '$2 >= 500 {print $1}' | head -n 1)
+    if [ -n "$REAL_USER" ]; then
+        exec su - "$REAL_USER" -c "$0 $*"
+        exit 0
+    else
+        echo "Error: Could not determine real user"
+        exit 1
+    fi
+fi
+
+# Get the script's directory
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 # Define default log file
 DEFAULT_LOG_FILE="logs/reporting-notifier.log"
 
@@ -8,14 +24,14 @@ log_message() {
     local level=$1
     local message=$2
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo "$timestamp [$level] - $message" | tee -a "$LOG_FILE"
+    echo "$timestamp [$level] - $message" | tee -a "$SCRIPT_DIR/$LOG_FILE"
 }
 
-# Source the .env file if it exists
-if [ -f .env ]; then
-    source .env
+# Source the .env file from script directory if it exists
+if [ -f "$SCRIPT_DIR/.env" ]; then
+    source "$SCRIPT_DIR/.env"
 else
-    echo "Error: .env file not found"
+    echo "Error: .env file not found in $SCRIPT_DIR"
     exit 1
 fi
 
@@ -23,8 +39,8 @@ fi
 LOG_FILE=${LOG_FILE:-$DEFAULT_LOG_FILE}
 
 # Create logs directory and log file
-mkdir -p "$(dirname "$LOG_FILE")" > /dev/null 2>&1
-touch "$LOG_FILE" > /dev/null 2>&1
+mkdir -p "$(dirname "$SCRIPT_DIR/$LOG_FILE")" > /dev/null 2>&1
+touch "$SCRIPT_DIR/$LOG_FILE" > /dev/null 2>&1
 
 # Check if required variables are set
 if [ -z "$SERVER_URL" ] || [ -z "$NOTIFICATION_TITLE" ] || [ -z "$NOTIFICATION_MESSAGE" ] || [ -z "$NOTIFICATION_PRIORITY" ] || [ -z "$NOTIFICATION_TAGS" ]; then
