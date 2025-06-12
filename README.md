@@ -2,6 +2,8 @@
 
 This code is used to send an hourly reminder to the person applying this software to send the reporting to the state
 
+At the current moment this repo works for both mac and linux systems.
+
 ## Setup
 
 1. clone this repository
@@ -13,7 +15,7 @@ This code is used to send an hourly reminder to the person applying this softwar
 
 ### Create a cronjob
 
-(On mac)
+For unix systems (mac, linux)
 
 1. run `crontab -e`
 2. insert your cronjob
