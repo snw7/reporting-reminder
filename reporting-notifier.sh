@@ -1,18 +1,5 @@
 #! /bin/bash
 
-# If running as root, switch to the real user
-if [ "$(id -u)" -eq 0 ]; then
-    # Get the first real user (non-system user)
-    REAL_USER=$(dscl . -list /Users UniqueID | awk '$2 >= 500 {print $1}' | head -n 1)
-    if [ -n "$REAL_USER" ]; then
-        exec su - "$REAL_USER" -c "$0 $*"
-        exit 0
-    else
-        echo "Error: Could not determine real user"
-        exit 1
-    fi
-fi
-
 # Get the script's directory
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
@@ -33,6 +20,23 @@ if [ -f "$SCRIPT_DIR/.env" ]; then
 else
     echo "Error: .env file not found in $SCRIPT_DIR"
     exit 1
+fi
+
+# If running as root, switch to the real user
+if [ "$(id -u)" -eq 0 ]; then
+    log_message "INFO" "Running as root, switching to non-root user"
+    # Get the first real user (non-system user)
+    REAL_USER=$(dscl . -list /Users UniqueID | awk '$2 >= 500 {print $1}' | head -n 1)
+    if [ -n "$REAL_USER" ]; then
+        exec su - "$REAL_USER" -c "$0 $*"
+        log_message "INFO" "Switched to non-root user: $REAL_USER"
+        exit 0
+    else
+        log_message "CRITICAL" "Error: Could not determine real user"
+        exit 1
+    fi
+else
+    log_message "INFO" "Running as non-root user already: $(whoami)"
 fi
 
 # Use LOG_FILE from .env if set, otherwise use default
@@ -65,14 +69,21 @@ fi
 # Check for notification system and send local notification
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS
-    if command -v terminal-notifier >/dev/null 2>&1; then
-        if terminal-notifier -title "$NOTIFICATION_TITLE" -message "$NOTIFICATION_MESSAGE" 2>/dev/null; then
+    # Try to find terminal-notifier in common locations
+    TERMINAL_NOTIFIER="/usr/local/bin/terminal-notifier"
+    if [ ! -f "$TERMINAL_NOTIFIER" ]; then
+        TERMINAL_NOTIFIER="/opt/homebrew/bin/terminal-notifier"
+    fi
+    
+    if [ -f "$TERMINAL_NOTIFIER" ]; then
+        if "$TERMINAL_NOTIFIER" -title "$NOTIFICATION_TITLE" -message "$NOTIFICATION_MESSAGE" 2>/dev/null; then
             log_message "INFO" "local notification sent successfully"
         else
             log_message "CRITICAL" "Failed to send local notification via terminal-notifier"
         fi
     else
-        log_message "WARNING" "terminal-notifier is not installed. Skipping local notification."
+        log_message "WARNING" "terminal-notifier not found in common locations. Skipping local notification."
+        log_message "INFO" "Searched in: /usr/local/bin/terminal-notifier and /opt/homebrew/bin/terminal-notifier"
     fi
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Linux
