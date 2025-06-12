@@ -1,19 +1,30 @@
 #! /bin/bash
 
+# Define default log file
+DEFAULT_LOG_FILE="logs/reporting-notifier.log"
+
 # Function to log messages with timestamp and level
 log_message() {
     local level=$1
     local message=$2
-    echo "$(date '+%Y-%m-%d %H:%M:%S') [$level] - $message"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "$timestamp [$level] - $message" | tee -a "$LOG_FILE"
 }
 
 # Source the .env file if it exists
 if [ -f .env ]; then
     source .env
 else
-    log_message "CRITICAL" "Error: .env file not found"
+    echo "Error: .env file not found"
     exit 1
 fi
+
+# Use LOG_FILE from .env if set, otherwise use default
+LOG_FILE=${LOG_FILE:-$DEFAULT_LOG_FILE}
+
+# Create logs directory and log file
+mkdir -p "$(dirname "$LOG_FILE")" > /dev/null 2>&1
+touch "$LOG_FILE" > /dev/null 2>&1
 
 # Check if required variables are set
 if [ -z "$SERVER_URL" ] || [ -z "$NOTIFICATION_TITLE" ] || [ -z "$NOTIFICATION_MESSAGE" ] || [ -z "$NOTIFICATION_PRIORITY" ] || [ -z "$NOTIFICATION_TAGS" ]; then
