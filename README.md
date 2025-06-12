@@ -4,9 +4,9 @@ A notification service that sends messages to ntfy and local system notification
 
 ## Getting Ready
 
-1. if you do not host your own ntfy server create an account on [ntfy.sh](ntfy.sh)
+1. If you do not host your own ntfy server create an account on [ntfy.sh](ntfy.sh)
 
-2. create a new topic for this use case
+2. Create a new topic for this use case
 
 3. Download the `ntfy` app to your phone and subscribe to your topic (enable push notifications here)
 
