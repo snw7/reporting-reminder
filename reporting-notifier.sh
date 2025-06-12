@@ -35,8 +35,6 @@ if [ "$(id -u)" -eq 0 ]; then
         log_message "CRITICAL" "Error: Could not determine real user"
         exit 1
     fi
-else
-    log_message "INFO" "Running as non-root user already: $(whoami)"
 fi
 
 # Use LOG_FILE from .env if set, otherwise use default
