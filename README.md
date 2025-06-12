@@ -9,9 +9,10 @@ At the current moment this repo works for both mac and linux systems.
 1. clone this repository
 2. if you do not host your own ntfy server create an account on [ntfy.sh](ntfy.sh)
 3. create a new topic for this use case
-4. setup your .env file (insert the URL you got for your topic)
-5. install terminal-notifier (`brew install terminal-notifier`)
-6. add a cronjob to your system, calling this script
+4. Download the `ntfy` app to your phone and subscribe to your topic (enable push notifications here)
+5. setup your .env file (insert the URL you got for your topic)
+6. install terminal-notifier (`brew install terminal-notifier`)
+7. add a cronjob to your system, calling this script
 
 ### Create a cronjob
 
