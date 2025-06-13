@@ -58,9 +58,9 @@ if [ -n "$SERVER_URL" ]; then
     -H "Tags: $NOTIFICATION_TAGS" \
     -d "$NOTIFICATION_MESSAGE" \
     "$SERVER_URL" > /dev/null; then
-        log_message "INFO" "ntfy message sent successfully: $SERVER_URL"
+        log_message "INFO" "Ntfy message sent successfully: $SERVER_URL"
     else
-        log_message "CRITICAL" "ntfy message couldn't send"
+        log_message "CRITICAL" "Ntfy message couldn't send"
     fi
 fi
 
@@ -75,24 +75,24 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     
     if [ -f "$TERMINAL_NOTIFIER" ]; then
         if "$TERMINAL_NOTIFIER" -title "$NOTIFICATION_TITLE" -message "$NOTIFICATION_MESSAGE" 2>/dev/null; then
-            log_message "INFO" "local notification sent successfully"
+            log_message "INFO" "Local notification sent successfully"
         else
             log_message "CRITICAL" "Failed to send local notification via terminal-notifier"
         fi
     else
-        log_message "WARNING" "terminal-notifier not found in common locations. Skipping local notification."
+        log_message "WARNING" "Dependency terminal-notifier not found in common locations. Skipping local notification."
         log_message "INFO" "Searched in: /usr/local/bin/terminal-notifier and /opt/homebrew/bin/terminal-notifier"
     fi
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Linux
     if command -v notify-send >/dev/null 2>&1; then
         if notify-send -u critical "$NOTIFICATION_TITLE" "$NOTIFICATION_MESSAGE" 2>/dev/null; then
-            log_message "INFO" "local notification sent successfully"
+            log_message "INFO" "Local notification sent successfully"
         else
             log_message "CRITICAL" "Failed to send local notification via notify-send"
         fi
     else
-        log_message "WARNING" "notify-send is not installed. Skipping local notification."
+        log_message "WARNING" "Dependency notify-send is not installed. Skipping local notification."
     fi
 else
     log_message "WARNING" "Unsupported operating system for local notifications."
